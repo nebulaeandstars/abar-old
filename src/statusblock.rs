@@ -1,6 +1,7 @@
 use std::time::{Duration, Instant};
 
 pub struct StatusBlock {
+    #[allow(dead_code)]
     name:          String,
     command:       Box<dyn Fn() -> String>,
     cache:         String,
@@ -23,6 +24,7 @@ impl StatusBlock {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_name(&self) -> &str {
         &self.name.as_str()
     }

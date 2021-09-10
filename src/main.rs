@@ -3,23 +3,23 @@ mod statusbar;
 mod statusblock;
 mod utils;
 
-use std::io;
-use std::io::Write;
-use std::time::Duration;
-
 use clap::{load_yaml, App};
 
 fn main() {
     let cli_settings = load_yaml!("cli.yml");
-    let cli = App::from_yaml(cli_settings);
+    let _ = App::from_yaml(cli_settings).get_matches();
 
     let mut status = config::bar();
 
     loop {
         status.update();
-        println!("{}", status);
 
-        io::stdout().flush().unwrap();
+        std::process::Command::new("xsetroot")
+            .arg("-name")
+            .arg(status.to_string().as_str())
+            .output()
+            .unwrap();
+
         std::thread::sleep(config::refresh_rate())
     }
 }

@@ -1,9 +1,8 @@
 name: abar
-version: "0.0.1"
+version: "0.1.0"
 author: Laura Powles <nebulaeandstars@gmail.com>
 about: a minimalistic status bar string generator
 
-version_short: "v"
 args:
     - config:
         short: c
@@ -14,4 +13,3 @@ args:
 subcommands:
     - full:
         about: Returns the full status string
-        version_short: "v"
