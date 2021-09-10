@@ -1,6 +1,7 @@
 mod config;
 mod statusbar;
 mod statusblock;
+mod utils;
 
 use std::io;
 use std::io::Write;
@@ -19,6 +20,6 @@ fn main() {
         println!("{}", status);
 
         io::stdout().flush().unwrap();
-        std::thread::sleep(Duration::from_secs(1))
+        std::thread::sleep(config::refresh_rate())
     }
 }

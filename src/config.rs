@@ -9,6 +9,13 @@ pub const fn delimiter() -> &'static str {
     " | "
 }
 
+/// Defines the refresh rate of the status bar. This also effectively controls
+/// the "resolution" of your block updates, so you probably won't want this any
+/// slower than your fastest block.
+pub const fn refresh_rate() -> Duration {
+    Duration::from_secs(1)
+}
+
 /// Defines the array of status blocks that will appear. This is the thing that
 /// you probably want to edit. A StatusBar is made up of a number of blocks,
 /// which each have a unique name, a closure that returns a String, and an
