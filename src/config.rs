@@ -20,7 +20,7 @@ pub const fn refresh_rate() -> Duration {
 /// you probably want to edit. A StatusBar is made up of a number of blocks,
 /// which each have a unique name, a closure that returns a String, and an
 /// optional update interval. If you haven't used Rust much before, I'd
-/// recommend defining unique functions for each block.
+/// recommend copying the example syntax.
 pub fn bar() -> StatusBar {
     use crate::utils::run;
 
@@ -53,8 +53,8 @@ pub fn bar() -> StatusBar {
     StatusBar::new(delimiter().to_string(), blocks)
 }
 
-/// Example showing how you can combine vanilla Rust with the shell. Displays
-/// the number of running processes.
+/// Example showing how you can combine vanilla Rust with the shell. This
+/// example displays the number of running processes.
 fn shell_example() -> String {
     // Run `sh` with the command as an argument. Not best practice but
     // definitely easier to read.
@@ -73,10 +73,11 @@ fn shell_example() -> String {
     format!("processes: {}", output)
 }
 
-/// One of the biggest perks of using Rust: the `cargo` package manager!
+/// One of the biggest perks of using Rust: the `cargo` library manager! This
+/// example displays the current time.
 /// Additional dependencies can be defined in Cargo.toml
 fn time_example() -> String {
-    use chrono::{Timelike, Utc};
+    use chrono::{Timelike, Utc}; // using an external Rust library in a block!
 
     // return a formatted string representing the current time.
     let now = Utc::now();
