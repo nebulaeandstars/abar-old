@@ -11,31 +11,43 @@ pub const fn delimiter() -> &'static str {
 
 /// Defines the array of status blocks that will appear. This is the thing that
 /// you probably want to edit. A StatusBar is made up of a number of blocks,
-/// which have a unique name, a closure that returns a String, and an optional
-/// update interval. If you haven't used Rust much before, I'd recommend
-/// copying the example syntax, defining unique functions for each block.
+/// which each have a unique name, a closure that returns a String, and an
+/// optional update interval. If you haven't used Rust much before, I'd
+/// recommend defining unique functions for each block.
 pub fn bar() -> StatusBar {
+    use crate::utils::run;
+
+    // This is of many ways to define your status bar. These examples
+    // demonstrate some of the things that you can do with `abar`, without
+    // assuming much prior Rust knowledge.
     let blocks = vec![
-        // block that shows the number of processes (10 second update time)
+        // You can wrap shell commands using the `run()` helper function.
+        StatusBlock::new(
+            "shell_wrapper",
+            &|| run(r"echo $USER"),
+            None, // doesn't update
+        ),
+        // Alternatively, combine rust with the shell like this.
         StatusBlock::new(
             "processes",
             &|| shell_example(),
-            Some(Duration::from_secs(10)),
+            Some(Duration::from_secs(10)), // updates every 10 seconds
         ),
-        // block that shows the current time (5 second update time)
+        // Or use Rust entirely by itself to make the fastest bar out there.
         StatusBlock::new(
             "time",
             &|| time_example(),
-            Some(Duration::from_secs(5)),
+            Some(Duration::from_secs(5)), // updates every 5 seconds
         ),
-        // block that says hello demonstrating closures (never updates)
+        // Raw closures are always an option as well.
         StatusBlock::new("hello", &|| "Hello, bar!".to_string(), None),
     ];
 
     StatusBar::new(delimiter().to_string(), blocks)
 }
 
-/// Example showing how you can combine Rust with the shell.
+/// Example showing how you can combine vanilla Rust with the shell. Displays
+/// the number of running processes.
 fn shell_example() -> String {
     // Run `sh` with the command as an argument. Not best practice but
     // definitely easier to read.
