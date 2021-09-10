@@ -3,18 +3,15 @@ version: "0.0.1"
 author: Laura Powles <nebulaeandstars@gmail.com>
 about: a minimalistic status bar string generator
 
-help_message: print help information
-version_message: print version information
 version_short: "v"
-
 args:
     - config:
         short: c
         long: config
         value_name: FILE
-        help: set a custom config file
+        help: Sets a custom config file
         takes_value: true
 subcommands:
     - full:
-        about: return the full status string
+        about: Returns the full status string
         version_short: "v"
