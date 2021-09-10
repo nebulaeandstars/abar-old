@@ -1,6 +1,6 @@
 use crate::statusblock::StatusBlock;
 
-pub const fn delim() -> &'static str {
+pub const fn delimiter() -> &'static str {
     " | "
 }
 
