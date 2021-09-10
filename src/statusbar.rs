@@ -1,6 +1,5 @@
 use std::fmt;
 
-use crate::config;
 use crate::statusblock::StatusBlock;
 
 pub struct StatusBar {
@@ -9,19 +8,18 @@ pub struct StatusBar {
 }
 
 impl StatusBar {
-    pub fn new() -> Self {
-        StatusBar {
-            delimiter: config::delimiter().to_string(),
-            blocks:    config::blocks(),
+    pub fn new(delimiter: String, blocks: Vec<StatusBlock>) -> Self {
+        StatusBar { delimiter, blocks }
+    }
+
+    pub fn update(&mut self) {
+        for block in &mut self.blocks {
+            block.update()
         }
     }
 
-    pub fn get_blocks(&self) -> &Vec<StatusBlock> {
-        &self.blocks
-    }
-
-    fn get_delimiter_for_index(&self, i: &usize) -> String {
-        match (1..self.blocks.len()).contains(i) {
+    fn get_delimiter_at_index(&self, i: usize) -> String {
+        match i >= 1 {
             true => self.delimiter.clone(),
             false => String::new(),
         }
@@ -36,8 +34,8 @@ impl fmt::Display for StatusBar {
             out.push_str(
                 format!(
                     "{}{}",
-                    self.get_delimiter_for_index(&i),
-                    block.evaluate(),
+                    self.get_delimiter_at_index(i),
+                    block.get_cache(),
                 )
                 .as_str(),
             );
