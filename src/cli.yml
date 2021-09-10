@@ -7,49 +7,14 @@ help_message: print help information
 version_message: print version information
 version_short: "v"
 
-# args:
-    # - config:
-    #     short: c
-    #     long: config
-    #     value_name: FILE
-    #     help: set a custom config file
-    #     takes_value: true
-    # - verbose:
-    #     short: v
-    #     multiple: true
-    #     help: set the level of verbosity
+args:
+    - config:
+        short: c
+        long: config
+        value_name: FILE
+        help: set a custom config file
+        takes_value: true
 subcommands:
-    - new:
-        about: create a new project in a new directory
+    - full:
+        about: return the full status string
         version_short: "v"
-        args:
-            - debug:
-                short: d
-                long: debug
-                help: enable debug output
-            - PATH:
-                help: the target path
-                required: true
-                index: 1
-    - init:
-        about: create a new project in the current directory
-        version_short: "v"
-        args:
-            - debug:
-                short: d
-                long: debug
-                help: enable debug output
-    - build:
-        about: build project files in a given directory
-        version_short: "v"
-        args:
-            - debug:
-                short: d
-                long: debug
-                help: enable debug output
-            - path:
-                short: p
-                long: path
-                value_name: PATH
-                help: path to the project directory (default = current)
-                takes_value: true
