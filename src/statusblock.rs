@@ -1,20 +1,14 @@
-pub struct StatusBlock<T>
-where
-    T: Fn() -> String,
-{
+pub struct StatusBlock {
     name:    String,
-    command: T,
+    command: Box<dyn Fn() -> String>,
 }
 
 
-impl<T> StatusBlock<T>
-where
-    T: Fn() -> String,
-{
-    pub fn new(name: &str, command: T) -> Self {
+impl StatusBlock {
+    pub fn new(name: &str, command: &'static dyn Fn() -> String) -> Self {
         StatusBlock {
             name:    name.to_string(),
-            command: command,
+            command: Box::new(command),
         }
     }
 
