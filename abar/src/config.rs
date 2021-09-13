@@ -13,7 +13,8 @@ pub fn bar() -> StatusBar {
     // You can use this wrapper to invoke shell commands.
     let run_example = StatusBlock::new()
         .name("run_example")
-        .command(&|| run("echo hello"));
+        .command(&|| run("echo hello"))
+        .min_size(8);
 
     // Alternatively, you can use the built-in interface,
     let shell_example = StatusBlock::new()
@@ -34,7 +35,8 @@ pub fn bar() -> StatusBar {
             let output = "hello from a closure";
             output.to_string()
         })
-        .poll_interval(Duration::from_secs(5));
+        .poll_interval(Duration::from_secs(5))
+        .size(18);
 
     // I've defined all of the blocks as variables in advance, but feel free to
     // do whatever you want for your own bar. Make it yours.
