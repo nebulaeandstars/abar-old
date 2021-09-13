@@ -2,16 +2,23 @@ mod config;
 mod utils;
 
 fn main() {
-    let mut status = config::bar();
+    let mut statusbar = config::bar();
+    let mut status = statusbar.to_string();
 
     loop {
-        std::process::Command::new("xsetroot")
-            .arg("-name")
-            .arg(status.to_string().as_str())
-            .output()
-            .unwrap();
+        let new_status = statusbar.to_string();
 
-        status.update();
-        status.sleep();
+        if status != new_status {
+            std::process::Command::new("xsetroot")
+                .arg("-name")
+                .arg(new_status.as_str())
+                .output()
+                .unwrap();
+
+            status = new_status;
+        }
+
+        statusbar.update();
+        statusbar.sleep();
     }
 }
