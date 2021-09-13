@@ -104,14 +104,11 @@ impl fmt::Display for StatusBar {
         let mut out = String::new();
 
         for (i, block) in self.blocks.iter().enumerate() {
-            out.push_str(
-                format!(
-                    "{}{}",
-                    self.get_delimiter_at_index(i),
-                    block.get_cache(),
-                )
-                .as_str(),
-            );
+            out.push_str(&format!(
+                "{}{}",
+                self.get_delimiter_at_index(i),
+                block,
+            ));
         }
 
         write!(f, "{}{}{}", self.left_buffer, out, self.right_buffer)
