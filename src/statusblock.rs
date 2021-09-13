@@ -1,3 +1,4 @@
+use std::fmt;
 use std::time::{Duration, Instant};
 
 /// Encapsulates a Fn() -> String closure.
@@ -76,6 +77,12 @@ impl StatusBlock {
 
     pub fn max_size(mut self, max_size: usize) -> Self {
         self.max_size = Some(max_size);
+        self
+    }
+
+    pub fn size(mut self, size: usize) -> Self {
+        self.min_size = Some(size);
+        self.max_size = Some(size);
         self
     }
 
