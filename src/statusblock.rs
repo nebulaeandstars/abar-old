@@ -23,6 +23,8 @@ pub struct StatusBlock {
     name:          String,
     command:       Box<dyn Fn() -> String>,
     poll_interval: Option<Duration>,
+    min_size:      Option<usize>,
+    max_size:      Option<usize>,
     cache:         String,
     last_update:   Instant,
 }
@@ -35,6 +37,8 @@ impl StatusBlock {
     ///     name:          String::new(),
     ///     command:       Box::new(|| String::new()),
     ///     poll_interval: None,
+    ///     min_size:      None,
+    ///     max_size:      None,
     /// }
     /// ```
     pub fn new() -> Self {
@@ -42,6 +46,8 @@ impl StatusBlock {
             name:          String::new(),
             command:       Box::new(|| String::new()),
             poll_interval: None,
+            min_size:      None,
+            max_size:      None,
             cache:         String::new(),
             last_update:   Instant::now(),
         }
@@ -60,6 +66,16 @@ impl StatusBlock {
 
     pub fn poll_interval(mut self, poll_interval: Duration) -> Self {
         self.poll_interval = Some(poll_interval);
+        self
+    }
+
+    pub fn min_size(mut self, min_size: usize) -> Self {
+        self.min_size = Some(min_size);
+        self
+    }
+
+    pub fn max_size(mut self, max_size: usize) -> Self {
+        self.max_size = Some(max_size);
         self
     }
 
