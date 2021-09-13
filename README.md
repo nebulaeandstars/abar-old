@@ -27,17 +27,23 @@ by directly toying with the source code. This results in the potential for an
 *incredibly* fast, powerful status bar that feels truly your own.
 
 [dwmblocks](https://github.com/torrinfail/dwmblocks) is a project with a similar
-goal. It's a fantastic project in its own right, but ABar differs in a few ways:
+goal. It's fantastic, but ABar differs in a few ways:
 
 1. ABar is available as both a library *and* a binary. This means that you can
-either hack on the source code in this repository, or create an entirely new
-project using the interface available on crates.io
+   either hack on the source code in this repository, or create an entirely new
+   project using the interface available on [crates.io](https://crates.io). My
+   [personal configuration](https://github.com/nebulaeandstars/abar-bin) is an
+   example of how you might use abar as a library.
 
 2. It's in Rust. While Rust is definitely harder to work with than C, you also
-have access to the `cargo` package manager. Cargo is fantastic, and can allow
-a newcomer to do some *very* advanced things in *raw* rust (ie. skipping shell
-scripts entirely). For many people, this alone can make abar the fastest status
-bar available.
+   have access to the `cargo` package manager. Cargo is fantastic, and can allow
+   a newcomer to do some *very* advanced things in *raw* rust (skipping shell
+   scripts entirely). For many people, this alone can make abar the fastest
+   status bar available.
+
+3. In general, dwmblocks focuses more on integration with shell scripts, while
+   abar focuses more on the customisability offered by direct access to the
+   source code.
 
 
 ### Installation
