@@ -20,15 +20,16 @@ pub fn bar() -> StatusBar {
     let shell_example = StatusBlock::new()
         .name("shell_example")
         .command(&|| shell_example())
-        .poll_interval(Duration::from_secs(1));
+        .poll_interval(Duration::from_secs(2));
 
     // or use vanilla Rust exclusively for the fastest bar out there.
     let vanilla_example = StatusBlock::new()
         .name("vanilla_example")
-        .command(&|| time_example())
-        .poll_interval(Duration::from_secs(5));
+        .command(&|| rand_example())
+        .poll_interval(Duration::from_millis(100))
+        .size(6);
 
-    // In case you were wondering how to use a closure:
+    // Finally, an example using a closure:
     let closure_example = StatusBlock::new()
         .name("closure_example")
         .command(&|| {
@@ -36,17 +37,17 @@ pub fn bar() -> StatusBar {
             output.to_string()
         })
         .poll_interval(Duration::from_secs(5))
-        .size(18);
+        .max_size(18);
 
-    // I've defined all of the blocks as variables in advance, but feel free to
-    // do whatever you want for your own bar. Make it yours.
+    // I've defined all of the example blocks as variables, but feel free to do
+    // whatever you want for your own bar. Make it yours.
     let blocks =
         vec![run_example, shell_example, closure_example, vanilla_example];
 
     // All fields are optional; default refresh rate is 1hz
     StatusBar::new()
         .blocks(blocks)
-        .refresh_rate(Duration::from_millis(500))
+        .refresh_rate(Duration::from_millis(100))
         .delimiter(" | ")
         .left_buffer(" >>> ")
         .right_buffer(" <<< ")
@@ -58,8 +59,7 @@ fn shell_example() -> String {
     // this is essentially what the `run()` function looks like.
     let output = Command::new("sh")
         .arg("-c")
-        // r"foo" is a raw string (no escape sequences)
-        .arg(r"ps -A --no-headers | wc -l")
+        .arg("ps -A --no-headers | wc -l")
         .output()
         .expect("Error in shell command!")
         .stdout;
@@ -72,20 +72,10 @@ fn shell_example() -> String {
 }
 
 /// One of the biggest perks of using Rust is the `cargo` dependency manager.
-/// This example uses the external `chrono` crate to display the current time as
-/// GMT. Additional dependencies can be defined as-needed in Cargo.toml
-fn time_example() -> String {
-    use chrono::{Timelike, Utc};
+/// This example uses the external `rand` crate to display random numbers.
+/// Additional dependencies can be defined as-needed in Cargo.toml
+fn rand_example() -> String {
+    use rand::random;
 
-    // return a formatted string representing the current time (GMT).
-    let now = Utc::now();
-    let (is_pm, hour) = now.hour12();
-
-    format!(
-        "{:02}:{:02}:{:02} {}",
-        hour,
-        now.minute(),
-        now.second(),
-        if is_pm { "PM" } else { "AM" }
-    )
+    format!("{}", random::<u16>())
 }
