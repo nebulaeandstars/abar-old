@@ -111,3 +111,23 @@ impl StatusBlock {
         };
     }
 }
+
+
+impl fmt::Display for StatusBlock {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut out = format!("{}", self.cache).to_string();
+
+        if let Some(max) = self.max_size {
+            out.truncate(max);
+        }
+
+        if let Some(min) = self.min_size {
+            let diff = min - out.len();
+            if diff > 0 {
+                out.push_str(&" ".repeat(diff));
+            }
+        }
+
+        write!(f, "{}", out)
+    }
+}
