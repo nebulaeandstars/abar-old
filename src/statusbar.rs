@@ -24,11 +24,12 @@ use crate::statusblock::StatusBlock;
 ///     .left_buffer(" <<< ");
 /// ```
 pub struct StatusBar {
-    delimiter:    String,
-    blocks:       Vec<StatusBlock>,
-    refresh_rate: Duration,
-    left_buffer:  String,
-    right_buffer: String,
+    delimiter:          String,
+    blocks:             Vec<StatusBlock>,
+    refresh_rate:       Duration,
+    left_buffer:        String,
+    right_buffer:       String,
+    hide_empty_modules: bool,
 }
 
 impl StatusBar {
@@ -36,20 +37,22 @@ impl StatusBar {
     ///
     /// ```
     /// StatusBar {
-    ///     blocks:       Vec::new(),
-    ///     refresh_rate: Duration::from_secs(1),
-    ///     delimiter:    String::new(),
-    ///     left_buffer:  String::new(),
-    ///     right_buffer: String::new(),
+    ///     blocks:             Vec::new(),
+    ///     refresh_rate:       Duration::from_secs(1),
+    ///     delimiter:          String::new(),
+    ///     left_buffer:        String::new(),
+    ///     right_buffer:       String::new(),
+    ///     hide_empty_modules: false,
     /// }
     /// ```
     pub fn new() -> Self {
         StatusBar {
-            blocks:       Vec::new(),
-            refresh_rate: Duration::from_secs(1),
-            delimiter:    String::new(),
-            left_buffer:  String::new(),
-            right_buffer: String::new(),
+            blocks:             Vec::new(),
+            refresh_rate:       Duration::from_secs(1),
+            delimiter:          String::new(),
+            left_buffer:        String::new(),
+            right_buffer:       String::new(),
+            hide_empty_modules: false,
         }
     }
 
@@ -75,6 +78,11 @@ impl StatusBar {
 
     pub fn right_buffer(mut self, right_buffer: &str) -> Self {
         self.right_buffer = right_buffer.to_string();
+        self
+    }
+
+    pub fn hide_empty_modules(mut self, hide_empty_modules: bool) -> Self {
+        self.hide_empty_modules = hide_empty_modules;
         self
     }
 
@@ -104,11 +112,13 @@ impl fmt::Display for StatusBar {
         let mut out = String::new();
 
         for (i, block) in self.blocks.iter().enumerate() {
-            out.push_str(&format!(
-                "{}{}",
-                self.get_delimiter_at_index(i),
-                block,
-            ));
+            if !self.hide_empty_modules || !block.is_empty() {
+                out.push_str(&format!(
+                    "{}{}",
+                    self.get_delimiter_at_index(i),
+                    block,
+                ));
+            }
         }
 
         write!(f, "{}{}{}", self.left_buffer, out, self.right_buffer)

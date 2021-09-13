@@ -97,6 +97,10 @@ impl StatusBlock {
         &self.cache
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.cache == ""
+    }
+
     /// Iff the StatusBlock needs to be updated, update it.
     pub fn update(&mut self) {
         match self.poll_interval {
