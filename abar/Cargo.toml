@@ -9,7 +9,7 @@ name = "abar"
 path = "src/main.rs"
 
 [dependencies]
-abar = "*"
+abar = {path = ".."}
 
 # add dependencies here
 chrono = "0.4"
