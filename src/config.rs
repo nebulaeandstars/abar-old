@@ -42,6 +42,7 @@ pub fn bar() -> StatusBar {
     let blocks =
         vec![run_example, shell_example, closure_example, vanilla_example];
 
+    // All fields are optional; default refresh rate is 1hz
     StatusBar::new()
         .blocks(blocks)
         .refresh_rate(Duration::from_millis(500))
