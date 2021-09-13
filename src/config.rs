@@ -9,46 +9,50 @@ pub const fn delimiter() -> &'static str {
     " | "
 }
 
-/// Defines the refresh rate of the status bar. This also effectively controls
-/// the "resolution" of your block updates, so you probably won't want this any
-/// slower than your fastest block.
+/// Defines the refresh rate of the status bar itself. This also effectively
+/// controls the "resolution" of your block updates. Unlike some other bars, a
+/// block update *won't* automatically trigger a bar update.
 pub const fn refresh_rate() -> Duration {
-    Duration::from_secs(1)
+    Duration::from_millis(500)
 }
 
-/// Defines the array of status blocks that will appear. This is the thing that
-/// you probably want to edit. A StatusBar is made up of a number of blocks,
-/// which each have a unique name, a closure that returns a String, and an
-/// optional update interval. If you haven't used Rust much before, I'd
-/// recommend copying the example syntax.
+/// This is the thing that you probably want to edit. A StatusBar is made up of
+/// a number of blocks, each with a unique name, a closure that returns a
+/// String, and an optional update interval. If you haven't used Rust much
+/// before, I'd recommend copying the example syntax.
 pub fn bar() -> StatusBar {
     use crate::utils::run;
 
-    // This is of many ways to define your status bar. These examples
-    // demonstrate some of the things that you can do with `abar`, without
-    // assuming much prior Rust knowledge.
-    let blocks = vec![
-        // You can wrap shell commands using the `run()` helper function.
-        StatusBlock::new(
-            "shell_wrapper",
-            &|| run(r"echo $USER"),
-            None, // doesn't update
-        ),
-        // Alternatively, combine rust with the shell like this.
-        StatusBlock::new(
-            "processes",
-            &|| shell_example(),
-            Some(Duration::from_secs(10)), // updates every 10 seconds
-        ),
-        // Or use Rust entirely by itself to make the fastest bar out there.
-        StatusBlock::new(
-            "time",
-            &|| time_example(),
-            Some(Duration::from_secs(5)), // updates every 5 seconds
-        ),
-        // Raw closures are always an option as well.
-        StatusBlock::new("hello", &|| "Hello, bar!".to_string(), None),
-    ];
+    // You can use this wrapper to invoke shell commands.
+    let run_example = StatusBlock::new()
+        .name("run_example")
+        .command(&|| run("echo hello"));
+
+    // Alternatively, you can use the built-in interface,
+    let shell_example = StatusBlock::new()
+        .name("shell_example")
+        .command(&|| shell_example())
+        .poll_interval(Duration::from_secs(1));
+
+    // or use vanilla Rust exclusively for the fastest bar out there.
+    let vanilla_example = StatusBlock::new()
+        .name("vanilla_example")
+        .command(&|| time_example())
+        .poll_interval(Duration::from_secs(5));
+
+    // In case you were wondering how to use a closure:
+    let closure_example = StatusBlock::new()
+        .name("closure_example")
+        .command(&|| {
+            let output = "hello from a closure";
+            output.to_string()
+        })
+        .poll_interval(Duration::from_secs(5));
+
+    // I've defined all of the blocks as variables in advance, but feel free to
+    // do whatever you want for your own bar. Make it yours.
+    let blocks =
+        vec![run_example, shell_example, closure_example, vanilla_example];
 
     StatusBar::new(delimiter().to_string(), blocks)
 }
@@ -56,8 +60,7 @@ pub fn bar() -> StatusBar {
 /// Example showing how you can combine vanilla Rust with the shell. This
 /// example displays the number of running processes.
 fn shell_example() -> String {
-    // Run `sh` with the command as an argument. Not best practice but
-    // definitely easier to read.
+    // this is essentially what the `run()` function looks like.
     let output = Command::new("sh")
         .arg("-c")
         // r"foo" is a raw string (no escape sequences)
@@ -73,15 +76,16 @@ fn shell_example() -> String {
     format!("processes: {}", output)
 }
 
-/// One of the biggest perks of using Rust: the `cargo` library manager! This
-/// example displays the current time.
-/// Additional dependencies can be defined in Cargo.toml
+/// One of the biggest perks of using Rust is the `cargo` dependency manager.
+/// This example uses the external `chrono` crate to display the current time as
+/// GMT. Additional dependencies can be defined as-needed in Cargo.toml
 fn time_example() -> String {
-    use chrono::{Timelike, Utc}; // using an external Rust library in a block!
+    use chrono::{Timelike, Utc};
 
-    // return a formatted string representing the current time.
+    // return a formatted string representing the current time (GMT).
     let now = Utc::now();
     let (is_pm, hour) = now.hour12();
+
     format!(
         "{:02}:{:02}:{:02} {}",
         hour,

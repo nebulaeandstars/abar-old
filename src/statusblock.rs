@@ -4,24 +4,36 @@ pub struct StatusBlock {
     #[allow(dead_code)]
     name:          String,
     command:       Box<dyn Fn() -> String>,
-    cache:         String,
     poll_interval: Option<Duration>,
+    cache:         String,
     last_update:   Instant,
 }
 
 impl StatusBlock {
-    pub fn new(
-        name: &str,
-        command: &'static dyn Fn() -> String,
-        poll_interval: Option<Duration>,
-    ) -> Self {
+    pub fn new() -> Self {
         StatusBlock {
-            name:          name.to_string(),
-            command:       Box::new(command),
-            cache:         command(),
-            poll_interval: poll_interval,
+            name:          String::new(),
+            command:       Box::new(|| "".to_string()),
+            poll_interval: None,
+            cache:         "".to_string(),
             last_update:   Instant::now(),
         }
+    }
+
+    pub fn name(mut self, name: &str) -> Self {
+        self.name = name.to_string();
+        self
+    }
+
+    pub fn command(mut self, command: &'static dyn Fn() -> String) -> Self {
+        self.command = Box::new(command);
+        self.cache = (self.command)();
+        self
+    }
+
+    pub fn poll_interval(mut self, poll_interval: Duration) -> Self {
+        self.poll_interval = Some(poll_interval);
+        self
     }
 
     #[allow(dead_code)]
