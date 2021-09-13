@@ -1,15 +1,40 @@
-use std::fmt;
+use std::time::Duration;
+use std::{fmt, thread};
 
 use crate::statusblock::StatusBlock;
 
 pub struct StatusBar {
-    delimiter: String,
-    blocks:    Vec<StatusBlock>,
+    delimiter:    String,
+    blocks:       Vec<StatusBlock>,
+    refresh_rate: Duration,
 }
 
 impl StatusBar {
-    pub fn new(delimiter: String, blocks: Vec<StatusBlock>) -> Self {
-        StatusBar { delimiter, blocks }
+    pub fn new() -> Self {
+        StatusBar {
+            delimiter:    String::new(),
+            blocks:       Vec::new(),
+            refresh_rate: Duration::from_secs(1),
+        }
+    }
+
+    pub fn delimiter(mut self, delimiter: &str) -> Self {
+        self.delimiter = delimiter.to_string();
+        self
+    }
+
+    pub fn blocks(mut self, blocks: Vec<StatusBlock>) -> Self {
+        self.blocks = blocks;
+        self
+    }
+
+    pub fn refresh_rate(mut self, refresh_rate: Duration) -> Self {
+        self.refresh_rate = refresh_rate;
+        self
+    }
+
+    pub fn sleep(&self) {
+        thread::sleep(self.refresh_rate)
     }
 
     pub fn update(&mut self) {

@@ -12,14 +12,13 @@ fn main() {
     let mut status = config::bar();
 
     loop {
-        status.update();
-
         std::process::Command::new("xsetroot")
             .arg("-name")
             .arg(status.to_string().as_str())
             .output()
             .unwrap();
 
-        std::thread::sleep(config::refresh_rate())
+        status.update();
+        status.sleep();
     }
 }

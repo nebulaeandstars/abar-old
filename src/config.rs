@@ -4,18 +4,6 @@ use std::time::Duration;
 use crate::statusbar::StatusBar;
 use crate::statusblock::StatusBlock;
 
-/// Defines the delimiter that will be used to split up the output.
-pub const fn delimiter() -> &'static str {
-    " | "
-}
-
-/// Defines the refresh rate of the status bar itself. This also effectively
-/// controls the "resolution" of your block updates. Unlike some other bars, a
-/// block update *won't* automatically trigger a bar update.
-pub const fn refresh_rate() -> Duration {
-    Duration::from_millis(500)
-}
-
 /// This is the thing that you probably want to edit. A StatusBar is made up of
 /// a number of blocks, each with a unique name, a closure that returns a
 /// String, and an optional update interval. If you haven't used Rust much
@@ -54,7 +42,10 @@ pub fn bar() -> StatusBar {
     let blocks =
         vec![run_example, shell_example, closure_example, vanilla_example];
 
-    StatusBar::new(delimiter().to_string(), blocks)
+    StatusBar::new()
+        .blocks(blocks)
+        .delimiter(" | ")
+        .refresh_rate(Duration::from_millis(500))
 }
 
 /// Example showing how you can combine vanilla Rust with the shell. This
