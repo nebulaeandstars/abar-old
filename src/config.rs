@@ -44,8 +44,10 @@ pub fn bar() -> StatusBar {
 
     StatusBar::new()
         .blocks(blocks)
-        .delimiter(" | ")
         .refresh_rate(Duration::from_millis(500))
+        .delimiter(" | ")
+        .left_buffer(" >>> ")
+        .right_buffer(" <<< ")
 }
 
 /// Example showing how you can combine vanilla Rust with the shell. This
