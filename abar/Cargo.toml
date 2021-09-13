@@ -1,0 +1,12 @@
+[package]
+name = "abar-bin"
+version = "0.2.0"
+authors = ["Laura Powles <laura@laurapowles.com>"]
+edition = "2018"
+
+[dependencies]
+abar = {path = ".."}
+
+# add dependencies here
+clap = {version = "2.33", features = ["yaml"]}
+chrono = "0.4"

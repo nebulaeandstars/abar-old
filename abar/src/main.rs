@@ -1,6 +1,4 @@
 mod config;
-mod statusbar;
-mod statusblock;
 mod utils;
 
 use clap::{load_yaml, App};

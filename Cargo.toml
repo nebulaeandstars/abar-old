@@ -4,8 +4,8 @@ version = "0.2.0"
 authors = ["Laura Powles <laura@laurapowles.com>"]
 edition = "2018"
 
-[dependencies]
-clap = {version = "2.33", features = ["yaml"]}
+[lib]
+name = "abar"
+path = "src/lib.rs"
 
-# add dependencies here
-chrono = "0.4"
+[dependencies]

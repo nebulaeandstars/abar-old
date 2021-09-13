@@ -1,8 +1,7 @@
 use std::process::Command;
 use std::time::Duration;
 
-use crate::statusbar::StatusBar;
-use crate::statusblock::StatusBlock;
+use abar::{StatusBar, StatusBlock};
 
 /// This is the thing that you probably want to edit. A StatusBar is made up of
 /// a number of blocks, each with a unique name, a closure that returns a
