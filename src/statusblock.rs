@@ -98,28 +98,25 @@ impl StatusBlock {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.cache == ""
+        self.cache.is_empty()
     }
 
     /// Iff the StatusBlock needs to be updated, update it.
     pub fn update(&mut self) {
-        match self.poll_interval {
-            Some(interval) => {
-                let now = Instant::now();
-                if now.duration_since(self.last_update) >= interval {
-                    self.cache = (self.command)();
-                    self.last_update = now;
-                }
+        if let Some(interval) = self.poll_interval {
+            let now = Instant::now();
+            if now.duration_since(self.last_update) >= interval {
+                self.cache = (self.command)();
+                self.last_update = now;
             }
-            None => (),
-        };
+        }
     }
 }
 
 
 impl fmt::Display for StatusBlock {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut out = format!("{}", self.cache).to_string();
+        let mut out = self.cache.to_string();
 
         if let Some(max) = self.max_size {
             out.truncate(max);
