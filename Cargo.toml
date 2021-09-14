@@ -1,6 +1,6 @@
 [package]
 name = "abar"
-version = "0.2.2"
+version = "0.3.1"
 authors = ["Laura Powles <laura@laurapowles.com>"]
 edition = "2018"
 
