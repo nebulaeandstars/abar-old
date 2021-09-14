@@ -124,3 +124,9 @@ impl fmt::Display for StatusBar {
         write!(f, "{}{}{}", self.left_buffer, out, self.right_buffer)
     }
 }
+
+impl Default for StatusBar {
+    fn default() -> Self {
+        Self::new()
+    }
+}

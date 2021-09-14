@@ -43,7 +43,7 @@ impl StatusBlock {
     /// }
     /// ```
     pub fn new() -> Self {
-        StatusBlock {
+        Self {
             name:          String::new(),
             command:       Box::new(|| String::new()),
             poll_interval: None,
@@ -130,5 +130,11 @@ impl fmt::Display for StatusBlock {
         }
 
         write!(f, "{}", out)
+    }
+}
+
+impl Default for StatusBlock {
+    fn default() -> Self {
+        Self::new()
     }
 }
