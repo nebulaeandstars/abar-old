@@ -45,7 +45,7 @@ impl StatusBlock {
     pub fn new() -> Self {
         Self {
             name:          String::new(),
-            command:       Box::new(|| String::new()),
+            command:       Box::new(String::new),
             poll_interval: None,
             min_size:      None,
             max_size:      None,
