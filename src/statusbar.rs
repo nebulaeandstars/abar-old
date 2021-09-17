@@ -3,9 +3,12 @@ use std::thread::JoinHandle;
 use std::time::Duration;
 use std::{fmt, thread};
 
-use spmc;
-
 use crate::statusblock::{Command, StatusBlock};
+
+type JobSender = spmc::Sender<(usize, Command)>;
+type JobReceiver = spmc::Receiver<(usize, Command)>;
+type ResultSender = mpsc::Sender<(usize, String)>;
+type ResultReceiver = mpsc::Receiver<(usize, String)>;
 
 /// Encapsulates a number of StatusBlocks.
 ///
@@ -34,14 +37,8 @@ pub struct StatusBar {
     left_buffer:        String,
     right_buffer:       String,
     hide_empty_modules: bool,
-    jobs_channel: (
-        spmc::Sender<(usize, Command)>,
-        spmc::Receiver<(usize, Command)>,
-    ),
-    results_channel: (
-        mpsc::Sender<(usize, String)>,
-        mpsc::Receiver<(usize, String)>,
-    ),
+    jobs_channel:       (JobSender, JobReceiver),
+    results_channel:    (ResultSender, ResultReceiver),
     threads:            Vec<JoinHandle<()>>,
 }
 
@@ -112,12 +109,7 @@ impl StatusBar {
         self.refresh_rate
     }
 
-    pub fn get_channels(
-        &self,
-    ) -> (
-        spmc::Receiver<(usize, Command)>,
-        mpsc::Sender<(usize, String)>,
-    ) {
+    pub fn get_channels(&self) -> (JobReceiver, ResultSender) {
         let (_, jobs_rx) = &self.jobs_channel;
         let (results_tx, _) = &self.results_channel;
 
@@ -143,13 +135,8 @@ impl StatusBar {
 
         // if there are no workers, clear the async queue
         if self.threads.is_empty() {
-            loop {
-                match jobs_rx.try_recv() {
-                    Ok((i, job)) => {
-                        results_tx.send((i, (job)())).unwrap();
-                    }
-                    Err(_) => break,
-                }
+            while let Ok((i, job)) = jobs_rx.try_recv() {
+                results_tx.send((i, (job)())).unwrap();
             }
         }
 
@@ -166,15 +153,9 @@ impl StatusBar {
             }
         }
 
-        loop {
-            match results_rx.try_recv() {
-                Ok((index, value)) => {
-                    // println!("\"{}\" updated",
-                    // self.blocks[index].get_name());
-                    self.blocks[index].manual_update(value);
-                }
-                Err(_) => break,
-            }
+        while let Ok((index, value)) = results_rx.try_recv() {
+            // println!("\"{}\" updated", self.blocks[index].get_name());
+            self.blocks[index].manual_update(value);
         }
     }
 
