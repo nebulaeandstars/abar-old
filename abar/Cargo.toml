@@ -13,3 +13,4 @@ abar = {path = ".."}
 
 # add dependencies here
 rand = "0.8.4"
+spmc = "0.3"

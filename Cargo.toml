@@ -13,3 +13,4 @@ name = "abar"
 path = "src/lib.rs"
 
 [dependencies]
+spmc = "0.3"

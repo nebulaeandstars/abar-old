@@ -28,8 +28,10 @@ pub struct StatusBlock {
     min_size:      Option<usize>,
     max_size:      Option<usize>,
     cache:         String,
-    last_update:   Instant,
+    last_update:   Option<Instant>,
 }
+
+pub type Command = Arc<dyn Fn() -> String + Send + Sync>;
 
 impl StatusBlock {
     /// Returns a new StatusBlock with default values. The defaults are:
@@ -51,7 +53,7 @@ impl StatusBlock {
             min_size:      None,
             max_size:      None,
             cache:         String::new(),
-            last_update:   Instant::now(),
+            last_update:   None,
         }
     }
 
@@ -65,7 +67,6 @@ impl StatusBlock {
         command: Arc<dyn Fn() -> String + Send + Sync>,
     ) -> Self {
         self.command = command;
-        self.cache = (self.command)();
         self
     }
 
@@ -90,6 +91,18 @@ impl StatusBlock {
         self
     }
 
+    pub fn needs_update(&self) -> bool {
+        if let Some(last_update) = self.last_update {
+            match self.poll_interval {
+                Some(interval) =>
+                    Instant::now().duration_since(last_update) >= interval,
+                None => false,
+            }
+        } else {
+            true
+        }
+    }
+
     /// Returns a reference to the name of the StatusBlock.
     #[allow(dead_code)]
     pub fn get_name(&self) -> &str {
@@ -101,19 +114,25 @@ impl StatusBlock {
         &self.cache
     }
 
+    pub fn get_command(&self) -> Command {
+        Arc::clone(&self.command)
+    }
+
     pub fn is_empty(&self) -> bool {
         self.cache.is_empty()
     }
 
     /// Iff the StatusBlock needs to be updated, update it.
     pub fn update(&mut self) {
-        if let Some(interval) = self.poll_interval {
-            let now = Instant::now();
-            if now.duration_since(self.last_update) >= interval {
-                self.cache = (self.command)();
-                self.last_update = now;
-            }
+        if self.needs_update() {
+            self.cache = (self.command)();
+            self.last_update = Some(Instant::now());
         }
+    }
+
+    pub fn manual_update(&mut self, val: String) {
+        self.cache = val;
+        self.last_update = Some(Instant::now());
     }
 }
 

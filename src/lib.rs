@@ -9,4 +9,4 @@ mod statusbar;
 mod statusblock;
 
 pub use statusbar::StatusBar;
-pub use statusblock::StatusBlock;
+pub use statusblock::{Command, StatusBlock};

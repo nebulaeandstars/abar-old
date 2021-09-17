@@ -1,7 +1,10 @@
+use std::sync::mpsc;
 use std::time::Duration;
 use std::{fmt, thread};
 
-use crate::statusblock::StatusBlock;
+use spmc;
+
+use crate::statusblock::{Command, StatusBlock};
 
 /// Encapsulates a number of StatusBlocks.
 ///
@@ -30,6 +33,14 @@ pub struct StatusBar {
     left_buffer:        String,
     right_buffer:       String,
     hide_empty_modules: bool,
+    jobs_channel: (
+        spmc::Sender<(usize, Command)>,
+        spmc::Receiver<(usize, Command)>,
+    ),
+    results_channel: (
+        mpsc::Sender<(usize, String)>,
+        mpsc::Receiver<(usize, String)>,
+    ),
 }
 
 impl StatusBar {
@@ -53,6 +64,9 @@ impl StatusBar {
             left_buffer:        String::new(),
             right_buffer:       String::new(),
             hide_empty_modules: false,
+
+            jobs_channel:    spmc::channel(),
+            results_channel: mpsc::channel(),
         }
     }
 
@@ -92,6 +106,22 @@ impl StatusBar {
         thread::sleep(self.refresh_rate)
     }
 
+    pub fn get_refresh_rate(&self) -> Duration {
+        self.refresh_rate
+    }
+
+    pub fn get_channels(
+        &self,
+    ) -> (
+        spmc::Receiver<(usize, Command)>,
+        mpsc::Sender<(usize, String)>,
+    ) {
+        let (_, jobs_rx) = &self.jobs_channel;
+        let (results_tx, _) = &self.results_channel;
+
+        (jobs_rx.clone(), results_tx.clone())
+    }
+
     /// Tells all blocks in the StatusBar to update themselves if needed.
     pub fn update(&mut self) {
         for block in &mut self.blocks {
@@ -99,8 +129,29 @@ impl StatusBar {
         }
     }
 
-    pub fn get_refresh_rate(&self) -> Duration {
-        self.refresh_rate
+    pub fn update_async(&mut self) {
+        let (jobs_tx, _) = &mut self.jobs_channel;
+        let (_, results_rx) = &self.results_channel;
+        let mut num_jobs = 0;
+
+        for (index, block) in &mut self.blocks.iter().enumerate() {
+            if block.needs_update() {
+                // println!("\"{}\" needs update", block.get_name());
+                jobs_tx.send((index, block.get_command())).unwrap();
+                num_jobs += 1;
+            }
+        }
+
+        for _ in 0..num_jobs {
+            match results_rx.try_recv() {
+                Ok((index, value)) => {
+                    // println!("\"{}\" updated",
+                    // self.blocks[index].get_name());
+                    self.blocks[index].manual_update(value);
+                }
+                Err(_) => break,
+            }
+        }
     }
 
     fn get_delimiter_at_index(&self, i: usize) -> String {

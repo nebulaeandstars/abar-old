@@ -4,6 +4,12 @@ use std::time::Duration;
 
 use abar::{StatusBar, StatusBlock};
 
+/// The number of blocks that can update concurrently. Most people won't need to
+/// change this, but bumping it up can cause a noticable difference in the
+/// initial load time if you have a lot of blocks. Setting it to 1 will disable
+/// concurrency.
+pub const NUM_WORKERS: u8 = 1;
+
 /// This is the thing that you probably want to edit. A StatusBar is made up of
 /// a number of blocks, each with a unique name, a closure that returns a
 /// String, and an optional update interval. If you haven't used Rust much
