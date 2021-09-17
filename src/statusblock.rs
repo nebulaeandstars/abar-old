@@ -19,16 +19,19 @@ use std::time::{Duration, Instant};
 ///     .name("example")
 ///     .command(&|| "hello".to_string())
 ///     .poll_interval(Duration::from_secs(5));
+///     .concurrent(true);
 /// ```
 pub struct StatusBlock {
     #[allow(dead_code)]
-    name:          String,
-    command:       Arc<dyn Fn() -> String + Send + Sync>,
-    poll_interval: Option<Duration>,
-    min_size:      Option<usize>,
-    max_size:      Option<usize>,
-    cache:         String,
-    last_update:   Option<Instant>,
+    name:                 String,
+    command:              Arc<dyn Fn() -> String + Send + Sync>,
+    poll_interval:        Option<Duration>,
+    update_in_background: bool,
+    min_size:             Option<usize>,
+    max_size:             Option<usize>,
+    cache:                String,
+    last_update:          Option<Instant>,
+    promised_result:      bool,
 }
 
 pub type Command = Arc<dyn Fn() -> String + Send + Sync>;
@@ -38,22 +41,25 @@ impl StatusBlock {
     ///
     /// ```
     /// StatusBlock {
-    ///     name:          String::new(),
-    ///     command:       Box::new(|| String::new()),
-    ///     poll_interval: None,
-    ///     min_size:      None,
-    ///     max_size:      None,
+    ///     name:                 String::new(),
+    ///     command:              Box::new(|| String::new()),
+    ///     poll_interval:        None,
+    ///     update_in_background: false,
+    ///     min_size:             None,
+    ///     max_size:             None,
     /// }
     /// ```
     pub fn new() -> Self {
         Self {
-            name:          String::new(),
-            command:       Arc::new(String::new),
-            poll_interval: None,
-            min_size:      None,
-            max_size:      None,
-            cache:         String::new(),
-            last_update:   None,
+            name:                 String::new(),
+            command:              Arc::new(String::new),
+            poll_interval:        None,
+            update_in_background: false,
+            min_size:             None,
+            max_size:             None,
+            cache:                String::new(),
+            last_update:          None,
+            promised_result:      false,
         }
     }
 
@@ -72,6 +78,11 @@ impl StatusBlock {
 
     pub fn poll_interval(mut self, poll_interval: Duration) -> Self {
         self.poll_interval = Some(poll_interval);
+        self
+    }
+
+    pub fn update_in_background(mut self, is_concurrent: bool) -> Self {
+        self.update_in_background = is_concurrent;
         self
     }
 
@@ -95,11 +106,12 @@ impl StatusBlock {
         if let Some(last_update) = self.last_update {
             match self.poll_interval {
                 Some(interval) =>
-                    Instant::now().duration_since(last_update) >= interval,
+                    Instant::now().duration_since(last_update) >= interval
+                        && !self.promised_result,
                 None => false,
             }
         } else {
-            true
+            !self.promised_result
         }
     }
 
@@ -114,12 +126,17 @@ impl StatusBlock {
         &self.cache
     }
 
+    /// Returns a clone of the StatusBlock's command reference.
     pub fn get_command(&self) -> Command {
         Arc::clone(&self.command)
     }
 
     pub fn is_empty(&self) -> bool {
         self.cache.is_empty()
+    }
+
+    pub fn is_concurrent(&self) -> bool {
+        self.update_in_background
     }
 
     /// Iff the StatusBlock needs to be updated, update it.
@@ -130,9 +147,23 @@ impl StatusBlock {
         }
     }
 
+    /// Force the StatusBlock to update itself.
+    pub fn update_unchecked(&mut self) {
+        self.cache = (self.command)();
+        self.last_update = Some(Instant::now());
+    }
+
+    /// Manually give the StatusBlock a String to update itself with.
     pub fn manual_update(&mut self, val: String) {
         self.cache = val;
+        self.promised_result = false;
+    }
+
+    /// Override the update cycle, preventing further updates until the next
+    /// manual_update() call.
+    pub fn promise_result(&mut self) {
         self.last_update = Some(Instant::now());
+        self.promised_result = true;
     }
 }
 

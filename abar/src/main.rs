@@ -7,18 +7,14 @@ use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use abar::{Command, StatusBar};
+use abar::Command;
 use spmc;
 
-fn work(statusbar: Arc<Mutex<StatusBar>>) {
-    let results_tx: mpsc::Sender<(usize, String)>;
-    let jobs_rx: spmc::Receiver<(usize, Command)>;
-
-    // temporarily gain control of the status bar to get a copy of the channels
-    let sb = statusbar.lock().unwrap();
-    (jobs_rx, results_tx) = sb.get_channels();
-    drop(sb);
-
+fn work(
+    jobs_rx: spmc::Receiver<(usize, Command)>,
+    results_tx: mpsc::Sender<(usize, String)>,
+) {
+    // listen for a new job, then send back the result.
     loop {
         let (i, job) = jobs_rx.recv().unwrap();
         results_tx.send((i, (job)())).unwrap();
@@ -28,20 +24,38 @@ fn work(statusbar: Arc<Mutex<StatusBar>>) {
 fn main() {
     let statusbar = config::bar();
 
+    // get bar parameters now, before it gets locked behind the mutex.
     let mut status = statusbar.to_string();
     let refresh_rate: Duration = statusbar.get_refresh_rate();
+    let (jobs_rx, results_tx) = statusbar.get_channels();
 
+    // protect the status bar to make it thread-safe.
     let statusbar = Arc::new(Mutex::new(statusbar));
 
-    for _ in 0..config::NUM_WORKERS {
-        let sb = Arc::clone(&statusbar);
-        thread::spawn(move || work(sb));
+    // if there's supposed to be more than one worker thread, spawn them.
+    for _ in 1..config::NUM_THREADS {
+        let jobs_rx = jobs_rx.clone();
+        let results_tx = results_tx.clone();
+        thread::spawn(move || work(jobs_rx, results_tx));
     }
 
     let mut new_status: String;
     loop {
         let mut sb = statusbar.lock().unwrap();
-        sb.update_async();
+
+        // if there are no worker threads, clear all pending asyncronous jobs
+        if config::NUM_THREADS <= 1 {
+            loop {
+                if let Ok((i, job)) = jobs_rx.try_recv() {
+                    results_tx.send((i, (job)())).unwrap();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        sb.update();
+
         new_status = sb.to_string();
         drop(sb);
 

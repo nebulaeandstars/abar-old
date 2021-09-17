@@ -122,27 +122,27 @@ impl StatusBar {
         (jobs_rx.clone(), results_tx.clone())
     }
 
-    /// Tells all blocks in the StatusBar to update themselves if needed.
+    /// Updates all blocks that need to be updated. Concurrent blocks create a
+    /// job (passed into jobs_tx), while non-concurrent blocks are updated
+    /// immediately.
     pub fn update(&mut self) {
-        for block in &mut self.blocks {
-            block.update()
-        }
-    }
-
-    pub fn update_async(&mut self) {
         let (jobs_tx, _) = &mut self.jobs_channel;
         let (_, results_rx) = &self.results_channel;
-        let mut num_jobs = 0;
 
-        for (index, block) in &mut self.blocks.iter().enumerate() {
+        for i in 0..self.blocks.len() {
+            let block = &mut self.blocks[i];
             if block.needs_update() {
                 // println!("\"{}\" needs update", block.get_name());
-                jobs_tx.send((index, block.get_command())).unwrap();
-                num_jobs += 1;
+                if block.is_concurrent() {
+                    block.promise_result();
+                    jobs_tx.send((i, block.get_command())).unwrap();
+                } else {
+                    block.update_unchecked();
+                }
             }
         }
 
-        for _ in 0..num_jobs {
+        loop {
             match results_rx.try_recv() {
                 Ok((index, value)) => {
                     // println!("\"{}\" updated",

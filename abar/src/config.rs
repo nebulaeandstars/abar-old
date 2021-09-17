@@ -6,9 +6,8 @@ use abar::{StatusBar, StatusBlock};
 
 /// The number of blocks that can update concurrently. Most people won't need to
 /// change this, but bumping it up can cause a noticable difference in the
-/// initial load time if you have a lot of blocks. Setting it to 1 will disable
-/// concurrency.
-pub const NUM_WORKERS: u8 = 1;
+/// initial load time if you have a lot of blocks. See the example below.
+pub const NUM_THREADS: u8 = 2;
 
 /// This is the thing that you probably want to edit. A StatusBar is made up of
 /// a number of blocks, each with a unique name, a closure that returns a
@@ -33,8 +32,16 @@ pub fn bar() -> StatusBar {
     let vanilla_example = StatusBlock::new()
         .name("vanilla_example")
         .command(Arc::new(|| rand_example()))
-        .poll_interval(Duration::from_millis(100))
+        .poll_interval(Duration::from_millis(10))
         .size(6);
+
+    // Slow blocks can be offloaded to the background if using worker threads.
+    let slow_example = StatusBlock::new()
+        .name("slow_example")
+        .command(Arc::new(|| slow_example()))
+        .poll_interval(Duration::from_secs(3))
+        .size(12)
+        .update_in_background(true); // try setting this to false
 
     // Finally, an example using a closure:
     let closure_example = StatusBlock::new()
@@ -43,18 +50,22 @@ pub fn bar() -> StatusBar {
             let output = "hello from a closure";
             output.to_string()
         }))
-        .poll_interval(Duration::from_secs(5))
         .max_size(18);
 
     // I've defined all of the example blocks as variables, but feel free to do
     // whatever you want for your own bar. Make it yours.
-    let blocks =
-        vec![run_example, shell_example, closure_example, vanilla_example];
+    let blocks = vec![
+        run_example,
+        shell_example,
+        closure_example,
+        slow_example,
+        vanilla_example,
+    ];
 
     // All fields are optional; default refresh rate is 1hz
     StatusBar::new()
         .blocks(blocks)
-        .refresh_rate(Duration::from_millis(100))
+        .refresh_rate(Duration::from_millis(10))
         .delimiter(" | ")
         .left_buffer(" >>> ")
         .right_buffer(" <<< ")
@@ -85,4 +96,14 @@ fn rand_example() -> String {
     use rand::random;
 
     format!("{}", random::<u16>())
+}
+
+/// This is very slow.
+fn slow_example() -> String {
+    use std::thread;
+
+    use rand::random;
+
+    thread::sleep(Duration::from_secs(1));
+    format!("slow: {}", random::<u16>())
 }
