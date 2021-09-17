@@ -134,18 +134,6 @@ impl StatusBar {
         }));
     }
 
-    /// Spawns a default worker thread to handle asyncronous blocks. Unlike
-    /// spawn_worker(), these threads will only accept one input before
-    /// exiting.
-    pub fn spawn_tmp_worker(&mut self) {
-        let (jobs_rx, results_tx) = self.get_channels();
-
-        self.threads.push(thread::spawn(move || {
-            let (i, job) = jobs_rx.recv().unwrap();
-            results_tx.send((i, (job)())).unwrap();
-        }));
-    }
-
     /// Updates all blocks that need to be updated. Concurrent blocks create a
     /// job (passed into jobs_tx), while non-concurrent blocks are updated
     /// immediately.
