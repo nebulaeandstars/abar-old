@@ -6,7 +6,8 @@ use abar::{StatusBar, StatusBlock};
 
 /// The number of blocks that can update concurrently. Most people won't need to
 /// change this, but bumping it up can cause a noticable difference in the
-/// initial load time if you have a lot of blocks. See the example below.
+/// initial load time if you have a lot of blocks. A value of 1 will disable
+/// concurrency, which is probably ok for most people.
 pub const NUM_THREADS: u8 = 2;
 
 /// This is the thing that you probably want to edit. A StatusBar is made up of

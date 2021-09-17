@@ -1,4 +1,5 @@
 use std::sync::mpsc;
+use std::thread::JoinHandle;
 use std::time::Duration;
 use std::{fmt, thread};
 
@@ -41,6 +42,7 @@ pub struct StatusBar {
         mpsc::Sender<(usize, String)>,
         mpsc::Receiver<(usize, String)>,
     ),
+    threads:            Vec<JoinHandle<()>>,
 }
 
 impl StatusBar {
@@ -64,9 +66,9 @@ impl StatusBar {
             left_buffer:        String::new(),
             right_buffer:       String::new(),
             hide_empty_modules: false,
-
-            jobs_channel:    spmc::channel(),
-            results_channel: mpsc::channel(),
+            jobs_channel:       spmc::channel(),
+            results_channel:    mpsc::channel(),
+            threads:            Vec::new(),
         }
     }
 
@@ -122,12 +124,46 @@ impl StatusBar {
         (jobs_rx.clone(), results_tx.clone())
     }
 
+    /// Spawns a default worker thread to handle asyncronous blocks.
+    pub fn spawn_worker(&mut self) {
+        let (jobs_rx, results_tx) = self.get_channels();
+
+        self.threads.push(thread::spawn(move || loop {
+            let (i, job) = jobs_rx.recv().unwrap();
+            results_tx.send((i, (job)())).unwrap();
+        }));
+    }
+
+    /// Spawns a default worker thread to handle asyncronous blocks. Unlike
+    /// spawn_worker(), these threads will only accept one input before
+    /// exiting.
+    pub fn spawn_tmp_worker(&mut self) {
+        let (jobs_rx, results_tx) = self.get_channels();
+
+        self.threads.push(thread::spawn(move || {
+            let (i, job) = jobs_rx.recv().unwrap();
+            results_tx.send((i, (job)())).unwrap();
+        }));
+    }
+
     /// Updates all blocks that need to be updated. Concurrent blocks create a
     /// job (passed into jobs_tx), while non-concurrent blocks are updated
     /// immediately.
     pub fn update(&mut self) {
-        let (jobs_tx, _) = &mut self.jobs_channel;
-        let (_, results_rx) = &self.results_channel;
+        let (jobs_tx, jobs_rx) = &mut self.jobs_channel;
+        let (results_tx, results_rx) = &mut self.results_channel;
+
+        // if there are no workers, clear the async queue
+        if self.threads.is_empty() {
+            loop {
+                match jobs_rx.try_recv() {
+                    Ok((i, job)) => {
+                        results_tx.send((i, (job)())).unwrap();
+                    }
+                    Err(_) => break,
+                }
+            }
+        }
 
         for i in 0..self.blocks.len() {
             let block = &mut self.blocks[i];
