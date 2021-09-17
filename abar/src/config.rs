@@ -1,4 +1,5 @@
 use std::process::Command;
+use std::sync::Arc;
 use std::time::Duration;
 
 use abar::{StatusBar, StatusBlock};
@@ -13,29 +14,29 @@ pub fn bar() -> StatusBar {
     // You can use this wrapper to invoke shell commands.
     let run_example = StatusBlock::new()
         .name("run_example")
-        .command(&|| run("echo hello"))
+        .command(Arc::new(|| run("echo hello")))
         .min_size(8);
 
     // Alternatively, you can use the built-in interface,
     let shell_example = StatusBlock::new()
         .name("shell_example")
-        .command(&|| shell_example())
+        .command(Arc::new(|| shell_example()))
         .poll_interval(Duration::from_secs(2));
 
     // or use vanilla Rust exclusively for the fastest bar out there.
     let vanilla_example = StatusBlock::new()
         .name("vanilla_example")
-        .command(&|| rand_example())
+        .command(Arc::new(|| rand_example()))
         .poll_interval(Duration::from_millis(100))
         .size(6);
 
     // Finally, an example using a closure:
     let closure_example = StatusBlock::new()
         .name("closure_example")
-        .command(&|| {
+        .command(Arc::new(|| {
             let output = "hello from a closure";
             output.to_string()
-        })
+        }))
         .poll_interval(Duration::from_secs(5))
         .max_size(18);
 

@@ -1,4 +1,5 @@
 use std::fmt;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 /// Encapsulates a Fn() -> String closure.
@@ -22,7 +23,7 @@ use std::time::{Duration, Instant};
 pub struct StatusBlock {
     #[allow(dead_code)]
     name:          String,
-    command:       Box<dyn Fn() -> String>,
+    command:       Arc<dyn Fn() -> String + Send + Sync>,
     poll_interval: Option<Duration>,
     min_size:      Option<usize>,
     max_size:      Option<usize>,
@@ -45,7 +46,7 @@ impl StatusBlock {
     pub fn new() -> Self {
         Self {
             name:          String::new(),
-            command:       Box::new(String::new),
+            command:       Arc::new(String::new),
             poll_interval: None,
             min_size:      None,
             max_size:      None,
@@ -59,8 +60,11 @@ impl StatusBlock {
         self
     }
 
-    pub fn command(mut self, command: &'static dyn Fn() -> String) -> Self {
-        self.command = Box::new(command);
+    pub fn command(
+        mut self,
+        command: Arc<dyn Fn() -> String + Send + Sync>,
+    ) -> Self {
+        self.command = command;
         self.cache = (self.command)();
         self
     }

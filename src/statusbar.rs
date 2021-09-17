@@ -99,6 +99,10 @@ impl StatusBar {
         }
     }
 
+    pub fn get_refresh_rate(&self) -> Duration {
+        self.refresh_rate
+    }
+
     fn get_delimiter_at_index(&self, i: usize) -> String {
         match i >= 1 {
             true => self.delimiter.clone(),
