@@ -21,6 +21,10 @@ type ResultReceiver = mpsc::Receiver<(usize, String)>;
 /// one you might use something like this:
 ///
 /// ```
+/// # use std::time::Duration;
+/// # use abar::StatusBlock;
+/// # use abar::StatusBar;
+///
 /// let blocks: Vec<StatusBlock> = vec![];
 ///
 /// let status = StatusBar::new()
@@ -30,7 +34,8 @@ type ResultReceiver = mpsc::Receiver<(usize, String)>;
 ///     .left_buffer(" >>> ")
 ///     .left_buffer(" <<< ");
 /// ```
-pub struct StatusBar {
+pub struct StatusBar
+{
     delimiter:          String,
     blocks:             Vec<StatusBlock>,
     refresh_rate:       Duration,
@@ -42,20 +47,11 @@ pub struct StatusBar {
     threads:            Vec<JoinHandle<()>>,
 }
 
-impl StatusBar {
-    /// Returns a new StatusBar with default values. The defaults are:
-    ///
-    /// ```
-    /// StatusBar {
-    ///     blocks:             Vec::new(),
-    ///     refresh_rate:       Duration::from_secs(1),
-    ///     delimiter:          String::new(),
-    ///     left_buffer:        String::new(),
-    ///     right_buffer:       String::new(),
-    ///     hide_empty_modules: false,
-    /// }
-    /// ```
-    pub fn new() -> Self {
+impl StatusBar
+{
+    /// Returns a new StatusBar with default values.
+    pub fn new() -> Self
+    {
         StatusBar {
             blocks:             Vec::new(),
             refresh_rate:       Duration::from_secs(1),
@@ -69,47 +65,50 @@ impl StatusBar {
         }
     }
 
-    pub fn blocks(mut self, blocks: Vec<StatusBlock>) -> Self {
+    pub fn blocks(mut self, blocks: Vec<StatusBlock>) -> Self
+    {
         self.blocks = blocks;
         self
     }
 
-    pub fn refresh_rate(mut self, refresh_rate: Duration) -> Self {
+    pub fn refresh_rate(mut self, refresh_rate: Duration) -> Self
+    {
         self.refresh_rate = refresh_rate;
         self
     }
 
-    pub fn delimiter(mut self, delimiter: &str) -> Self {
+    pub fn delimiter(mut self, delimiter: &str) -> Self
+    {
         self.delimiter = delimiter.to_string();
         self
     }
 
-    pub fn left_buffer(mut self, left_buffer: &str) -> Self {
+    pub fn left_buffer(mut self, left_buffer: &str) -> Self
+    {
         self.left_buffer = left_buffer.to_string();
         self
     }
 
-    pub fn right_buffer(mut self, right_buffer: &str) -> Self {
+    pub fn right_buffer(mut self, right_buffer: &str) -> Self
+    {
         self.right_buffer = right_buffer.to_string();
         self
     }
 
-    pub fn hide_empty_modules(mut self, hide_empty_modules: bool) -> Self {
+    pub fn hide_empty_modules(mut self, hide_empty_modules: bool) -> Self
+    {
         self.hide_empty_modules = hide_empty_modules;
         self
     }
 
     /// Puts the current thread to sleep for an amount of time defined by the
     /// StatusBar's refresh_rate.
-    pub fn sleep(&self) {
-        thread::sleep(self.refresh_rate)
-    }
+    pub fn sleep(&self) { thread::sleep(self.refresh_rate) }
 
-    pub fn get_refresh_rate(&self) -> Duration {
-        self.refresh_rate
-    }
+    pub fn get_refresh_rate(&self) -> Duration { self.refresh_rate }
 
-    pub fn get_channels(&self) -> (JobReceiver, ResultSender) {
+    pub fn get_channels(&self) -> (JobReceiver, ResultSender)
+    {
         let (_, jobs_rx) = &self.jobs_channel;
         let (results_tx, _) = &self.results_channel;
 
@@ -117,7 +116,8 @@ impl StatusBar {
     }
 
     /// Spawns a default worker thread to handle asyncronous blocks.
-    pub fn spawn_worker(&mut self) {
+    pub fn spawn_worker(&mut self)
+    {
         let (jobs_rx, results_tx) = self.get_channels();
 
         self.threads.push(thread::spawn(move || loop {
@@ -129,7 +129,8 @@ impl StatusBar {
     /// Updates all blocks that need to be updated. Concurrent blocks create a
     /// job (passed into jobs_tx), while non-concurrent blocks are updated
     /// immediately.
-    pub fn update(&mut self) {
+    pub fn update(&mut self)
+    {
         let (jobs_tx, jobs_rx) = &mut self.jobs_channel;
         let (results_tx, results_rx) = &mut self.results_channel;
 
@@ -147,7 +148,8 @@ impl StatusBar {
                 if block.is_concurrent() {
                     block.promise_result();
                     jobs_tx.send((i, block.get_command())).unwrap();
-                } else {
+                }
+                else {
                     block.update_unchecked();
                 }
             }
@@ -159,7 +161,8 @@ impl StatusBar {
         }
     }
 
-    fn get_delimiter_at_index(&self, i: usize) -> String {
+    fn get_delimiter_at_index(&self, i: usize) -> String
+    {
         match i >= 1 {
             true => self.delimiter.clone(),
             false => String::new(),
@@ -167,8 +170,10 @@ impl StatusBar {
     }
 }
 
-impl fmt::Display for StatusBar {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for StatusBar
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
+    {
         let mut out = String::new();
 
         for (i, block) in self.blocks.iter().enumerate() {
@@ -185,8 +190,7 @@ impl fmt::Display for StatusBar {
     }
 }
 
-impl Default for StatusBar {
-    fn default() -> Self {
-        Self::new()
-    }
+impl Default for StatusBar
+{
+    fn default() -> Self { Self::new() }
 }
