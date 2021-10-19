@@ -145,12 +145,12 @@ impl StatusBar
             let block = &mut self.blocks[i];
             if block.needs_update() {
                 // println!("\"{}\" needs update", block.get_name());
-                if block.is_concurrent() {
+                if block.is_concurrent {
                     block.promise_result();
-                    jobs_tx.send((i, block.get_command())).unwrap();
+                    jobs_tx.send((i, block.command)).unwrap();
                 }
                 else {
-                    block.update_unchecked();
+                    block.update_now();
                 }
             }
         }

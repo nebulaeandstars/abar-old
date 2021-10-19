@@ -28,16 +28,15 @@ pub type Command = fn() -> String;
 /// ```
 pub struct StatusBlock
 {
-    #[allow(dead_code)]
-    name:                 String,
-    command:              Command,
-    poll_interval:        Option<Duration>,
-    update_in_background: bool,
-    min_size:             Option<usize>,
-    max_size:             Option<usize>,
-    cache:                String,
-    last_update:          Option<Instant>,
-    promised_result:      bool,
+    pub name:          String,
+    pub command:       Command,
+    pub poll_interval: Option<Duration>,
+    pub is_concurrent: bool,
+    pub min_size:      Option<usize>,
+    pub max_size:      Option<usize>,
+    cache:             String,
+    last_update:       Option<Instant>,
+    promised_result:   bool,
 }
 
 impl StatusBlock
@@ -46,15 +45,15 @@ impl StatusBlock
     pub fn new() -> Self
     {
         Self {
-            name:                 String::new(),
-            command:              String::new,
-            poll_interval:        None,
-            update_in_background: false,
-            min_size:             None,
-            max_size:             None,
-            cache:                String::new(),
-            last_update:          None,
-            promised_result:      false,
+            name:            String::new(),
+            command:         String::new,
+            poll_interval:   None,
+            is_concurrent:   false,
+            min_size:        None,
+            max_size:        None,
+            cache:           String::new(),
+            last_update:     None,
+            promised_result: false,
         }
     }
 
@@ -78,7 +77,7 @@ impl StatusBlock
 
     pub fn update_in_background(mut self, is_concurrent: bool) -> Self
     {
-        self.update_in_background = is_concurrent;
+        self.is_concurrent = is_concurrent;
         self
     }
 
@@ -101,34 +100,25 @@ impl StatusBlock
         self
     }
 
-    pub fn needs_update(&self) -> bool
-    {
-        if let Some(last_update) = self.last_update {
-            match self.poll_interval {
-                Some(interval) =>
-                    Instant::now().duration_since(last_update) >= interval
-                        && !self.promised_result,
-                None => false,
-            }
-        }
-        else {
-            !self.promised_result
-        }
-    }
-
-    /// Returns a reference to the name of the StatusBlock.
-    #[allow(dead_code)]
-    pub fn get_name(&self) -> &str { &self.name.as_str() }
-
-    /// Returns a reference to the StatusBlocks's cache.
-    pub fn get_cache(&self) -> &String { &self.cache }
-
-    /// Returns a clone of the StatusBlock's command reference.
-    pub fn get_command(&self) -> Command { self.command }
-
     pub fn is_empty(&self) -> bool { self.cache.is_empty() }
 
-    pub fn is_concurrent(&self) -> bool { self.update_in_background }
+    /// Returns whether or not the StatusBlock needs to be updated.
+    pub fn needs_update(&self) -> bool
+    {
+        if self.last_update.is_none() {
+            true
+        }
+        else if self.promised_result || self.poll_interval.is_none() {
+            false
+        }
+        else {
+            let last_update = self.last_update.unwrap();
+            let poll_interval = self.poll_interval.unwrap();
+            let now = Instant::now();
+
+            now.duration_since(last_update) >= poll_interval
+        }
+    }
 
     /// Iff the StatusBlock needs to be updated, update it.
     pub fn update(&mut self)
@@ -140,7 +130,7 @@ impl StatusBlock
     }
 
     /// Force the StatusBlock to update itself.
-    pub fn update_unchecked(&mut self)
+    pub fn update_now(&mut self)
     {
         self.cache = (self.command)();
         self.last_update = Some(Instant::now());
