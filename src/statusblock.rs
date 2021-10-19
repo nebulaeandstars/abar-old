@@ -20,7 +20,7 @@ pub type Command = fn() -> String;
 /// # use std::sync::Arc;
 /// # use abar::StatusBlock;
 ///
-/// let block = StatusBlock::new()
+/// let block = StatusBlock::default()
 ///     .name("example")
 ///     .command(String::new)
 ///     .poll_interval(Duration::from_secs(5))

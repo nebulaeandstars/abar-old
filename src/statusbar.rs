@@ -27,7 +27,7 @@ type ResultReceiver = mpsc::Receiver<(usize, String)>;
 ///
 /// let blocks: Vec<StatusBlock> = vec![];
 ///
-/// let status = StatusBar::new()
+/// let status = StatusBar::default()
 ///     .blocks(blocks)
 ///     .refresh_rate(Duration::from_millis(500))
 ///     .delimiter(" | ")
