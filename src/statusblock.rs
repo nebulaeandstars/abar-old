@@ -1,5 +1,4 @@
 use std::fmt;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 /// Encapsulates a Fn() -> String closure.
@@ -29,7 +28,7 @@ pub struct StatusBlock
 {
     #[allow(dead_code)]
     name:                 String,
-    command:              Arc<dyn Fn() -> String + Send + Sync>,
+    command:              fn() -> String,
     poll_interval:        Option<Duration>,
     update_in_background: bool,
     min_size:             Option<usize>,
@@ -39,8 +38,6 @@ pub struct StatusBlock
     promised_result:      bool,
 }
 
-pub type Command = Arc<dyn Fn() -> String + Send + Sync>;
-
 impl StatusBlock
 {
     /// Returns a new StatusBlock with default values.
@@ -48,7 +45,7 @@ impl StatusBlock
     {
         Self {
             name:                 String::new(),
-            command:              Arc::new(String::new),
+            command:              String::new,
             poll_interval:        None,
             update_in_background: false,
             min_size:             None,
@@ -65,9 +62,7 @@ impl StatusBlock
         self
     }
 
-    pub fn command(
-        mut self, command: Arc<dyn Fn() -> String + Send + Sync>,
-    ) -> Self
+    pub fn command(mut self, command: fn() -> String) -> Self
     {
         self.command = command;
         self
@@ -127,7 +122,7 @@ impl StatusBlock
     pub fn get_cache(&self) -> &String { &self.cache }
 
     /// Returns a clone of the StatusBlock's command reference.
-    pub fn get_command(&self) -> Command { Arc::clone(&self.command) }
+    pub fn get_command(&self) -> fn() -> String { self.command }
 
     pub fn is_empty(&self) -> bool { self.cache.is_empty() }
 
