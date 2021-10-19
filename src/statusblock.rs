@@ -22,7 +22,7 @@ pub type Command = fn() -> String;
 ///
 /// let block = StatusBlock::new()
 ///     .name("example")
-///     .command(Arc::new(|| String::new()))
+///     .command(String::new)
 ///     .poll_interval(Duration::from_secs(5))
 ///     .update_in_background(true);
 /// ```

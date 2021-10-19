@@ -9,11 +9,23 @@ use abar::{StatusBar, StatusBlock};
 /// concurrency, which is probably ok for most people.
 pub const NUM_THREADS: u8 = 2;
 
+/// Definition of the StatusBar
+pub fn bar() -> StatusBar
+{
+    // All fields are optional; default refresh rate is 1hz
+    StatusBar::new()
+        .blocks(blocks())
+        .refresh_rate(Duration::from_millis(10))
+        .delimiter(" | ")
+        .left_buffer(" >>> ")
+        .right_buffer(" <<< ")
+}
+
 /// This is the thing that you probably want to edit. A StatusBar is made up of
 /// a number of blocks, each with a unique name, a closure that returns a
 /// String, and an optional update interval. If you haven't used Rust much
 /// before, I'd recommend copying the example syntax.
-pub fn bar() -> StatusBar
+fn blocks() -> Vec<StatusBlock>
 {
     use crate::utils::run;
 
@@ -53,23 +65,13 @@ pub fn bar() -> StatusBar
         })
         .max_size(18);
 
-    // I've defined all of the example blocks as variables, but feel free to do
-    // whatever you want for your own bar. Make it yours.
-    let blocks = vec![
+    vec![
         run_example,
         shell_example,
         closure_example,
         slow_example,
         vanilla_example,
-    ];
-
-    // All fields are optional; default refresh rate is 1hz
-    StatusBar::new()
-        .blocks(blocks)
-        .refresh_rate(Duration::from_millis(10))
-        .delimiter(" | ")
-        .left_buffer(" >>> ")
-        .right_buffer(" <<< ")
+    ]
 }
 
 /// Example showing how you can combine vanilla Rust with the shell. This
