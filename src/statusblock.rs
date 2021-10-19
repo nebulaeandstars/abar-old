@@ -1,6 +1,8 @@
 use std::fmt;
 use std::time::{Duration, Instant};
 
+pub type Command = fn() -> String;
+
 /// Encapsulates a Fn() -> String closure.
 ///
 /// Each StatusBlock has a unique name, some command that returns a string, and
@@ -28,7 +30,7 @@ pub struct StatusBlock
 {
     #[allow(dead_code)]
     name:                 String,
-    command:              fn() -> String,
+    command:              Command,
     poll_interval:        Option<Duration>,
     update_in_background: bool,
     min_size:             Option<usize>,
@@ -62,7 +64,7 @@ impl StatusBlock
         self
     }
 
-    pub fn command(mut self, command: fn() -> String) -> Self
+    pub fn command(mut self, command: Command) -> Self
     {
         self.command = command;
         self
@@ -122,7 +124,7 @@ impl StatusBlock
     pub fn get_cache(&self) -> &String { &self.cache }
 
     /// Returns a clone of the StatusBlock's command reference.
-    pub fn get_command(&self) -> fn() -> String { self.command }
+    pub fn get_command(&self) -> Command { self.command }
 
     pub fn is_empty(&self) -> bool { self.cache.is_empty() }
 

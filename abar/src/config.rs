@@ -1,5 +1,4 @@
 use std::process::Command;
-use std::sync::Arc;
 use std::time::Duration;
 
 use abar::{StatusBar, StatusBlock};
@@ -14,32 +13,33 @@ pub const NUM_THREADS: u8 = 2;
 /// a number of blocks, each with a unique name, a closure that returns a
 /// String, and an optional update interval. If you haven't used Rust much
 /// before, I'd recommend copying the example syntax.
-pub fn bar() -> StatusBar {
+pub fn bar() -> StatusBar
+{
     use crate::utils::run;
 
     // You can use this wrapper to invoke shell commands.
     let run_example = StatusBlock::new()
         .name("run_example")
-        .command(Arc::new(|| run("echo hello")))
+        .command(|| run("echo hello"))
         .min_size(8);
 
     // Alternatively, you can use the built-in interface,
     let shell_example = StatusBlock::new()
         .name("shell_example")
-        .command(Arc::new(|| shell_example()))
+        .command(|| shell_example())
         .poll_interval(Duration::from_secs(2));
 
     // or use vanilla Rust exclusively for the fastest bar out there.
     let vanilla_example = StatusBlock::new()
         .name("vanilla_example")
-        .command(Arc::new(|| rand_example()))
+        .command(|| rand_example())
         .poll_interval(Duration::from_millis(10))
         .size(6);
 
     // Slow blocks can be offloaded to the background if using worker threads.
     let slow_example = StatusBlock::new()
         .name("slow_example")
-        .command(Arc::new(|| slow_example()))
+        .command(|| slow_example())
         .poll_interval(Duration::from_secs(3))
         .size(12)
         .update_in_background(true); // try setting this to false
@@ -47,10 +47,10 @@ pub fn bar() -> StatusBar {
     // Finally, an example using a closure:
     let closure_example = StatusBlock::new()
         .name("closure_example")
-        .command(Arc::new(|| {
+        .command(|| {
             let output = "hello from a closure";
             output.to_string()
-        }))
+        })
         .max_size(18);
 
     // I've defined all of the example blocks as variables, but feel free to do
@@ -74,7 +74,8 @@ pub fn bar() -> StatusBar {
 
 /// Example showing how you can combine vanilla Rust with the shell. This
 /// example displays the number of running processes.
-fn shell_example() -> String {
+fn shell_example() -> String
+{
     // this is essentially what the `run()` function looks like.
     let output = Command::new("sh")
         .arg("-c")
@@ -93,14 +94,16 @@ fn shell_example() -> String {
 /// One of the biggest perks of using Rust is the `cargo` dependency manager.
 /// This example uses the external `rand` crate to display random numbers.
 /// Additional dependencies can be defined as-needed in Cargo.toml
-fn rand_example() -> String {
+fn rand_example() -> String
+{
     use rand::random;
 
     format!("{}", random::<u16>())
 }
 
 /// This is very slow.
-fn slow_example() -> String {
+fn slow_example() -> String
+{
     use std::thread;
 
     use rand::random;
