@@ -41,65 +41,6 @@ pub struct StatusBlock
 
 impl StatusBlock
 {
-    /// Returns a new StatusBlock with default values.
-    pub fn new() -> Self
-    {
-        Self {
-            name:            String::new(),
-            command:         String::new,
-            poll_interval:   None,
-            is_concurrent:   false,
-            min_size:        None,
-            max_size:        None,
-            cache:           String::new(),
-            last_update:     None,
-            promised_result: false,
-        }
-    }
-
-    pub fn name(mut self, name: &str) -> Self
-    {
-        self.name = name.to_string();
-        self
-    }
-
-    pub fn command(mut self, command: Command) -> Self
-    {
-        self.command = command;
-        self
-    }
-
-    pub fn poll_interval(mut self, poll_interval: Duration) -> Self
-    {
-        self.poll_interval = Some(poll_interval);
-        self
-    }
-
-    pub fn update_in_background(mut self, is_concurrent: bool) -> Self
-    {
-        self.is_concurrent = is_concurrent;
-        self
-    }
-
-    pub fn min_size(mut self, min_size: usize) -> Self
-    {
-        self.min_size = Some(min_size);
-        self
-    }
-
-    pub fn max_size(mut self, max_size: usize) -> Self
-    {
-        self.max_size = Some(max_size);
-        self
-    }
-
-    pub fn size(mut self, size: usize) -> Self
-    {
-        self.min_size = Some(size);
-        self.max_size = Some(size);
-        self
-    }
-
     pub fn is_empty(&self) -> bool { self.cache.is_empty() }
 
     /// Returns whether or not the StatusBlock needs to be updated.
@@ -150,6 +91,52 @@ impl StatusBlock
         self.last_update = Some(Instant::now());
         self.promised_result = true;
     }
+
+
+    // ------ builder methods ------ //
+
+    pub fn name(mut self, name: &str) -> Self
+    {
+        self.name = name.to_string();
+        self
+    }
+
+    pub fn command(mut self, command: Command) -> Self
+    {
+        self.command = command;
+        self
+    }
+
+    pub fn poll_interval(mut self, poll_interval: Duration) -> Self
+    {
+        self.poll_interval = Some(poll_interval);
+        self
+    }
+
+    pub fn update_in_background(mut self, is_concurrent: bool) -> Self
+    {
+        self.is_concurrent = is_concurrent;
+        self
+    }
+
+    pub fn min_size(mut self, min_size: usize) -> Self
+    {
+        self.min_size = Some(min_size);
+        self
+    }
+
+    pub fn max_size(mut self, max_size: usize) -> Self
+    {
+        self.max_size = Some(max_size);
+        self
+    }
+
+    pub fn size(mut self, size: usize) -> Self
+    {
+        self.min_size = Some(size);
+        self.max_size = Some(size);
+        self
+    }
 }
 
 
@@ -176,5 +163,18 @@ impl fmt::Display for StatusBlock
 
 impl Default for StatusBlock
 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self
+    {
+        Self {
+            name:            String::new(),
+            command:         String::new,
+            poll_interval:   None,
+            is_concurrent:   false,
+            min_size:        None,
+            max_size:        None,
+            cache:           String::new(),
+            last_update:     None,
+            promised_result: false,
+        }
+    }
 }

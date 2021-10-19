@@ -1,7 +1,8 @@
 mod config;
 mod utils;
 
-fn main() {
+fn main()
+{
     let mut statusbar = config::bar();
     let mut status = statusbar.to_string();
 

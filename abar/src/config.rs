@@ -13,7 +13,7 @@ pub const NUM_THREADS: u8 = 2;
 pub fn bar() -> StatusBar
 {
     // All fields are optional; default refresh rate is 1hz
-    StatusBar::new()
+    StatusBar::default()
         .blocks(blocks())
         .refresh_rate(Duration::from_millis(10))
         .delimiter(" | ")
@@ -30,26 +30,26 @@ fn blocks() -> Vec<StatusBlock>
     use crate::utils::run;
 
     // You can use this wrapper to invoke shell commands.
-    let run_example = StatusBlock::new()
+    let run_example = StatusBlock::default()
         .name("run_example")
         .command(|| run("echo hello"))
         .min_size(8);
 
     // Alternatively, you can use the built-in interface,
-    let shell_example = StatusBlock::new()
+    let shell_example = StatusBlock::default()
         .name("shell_example")
         .command(|| shell_example())
         .poll_interval(Duration::from_secs(2));
 
     // or use vanilla Rust exclusively for the fastest bar out there.
-    let vanilla_example = StatusBlock::new()
+    let vanilla_example = StatusBlock::default()
         .name("vanilla_example")
         .command(|| rand_example())
         .poll_interval(Duration::from_millis(10))
         .size(6);
 
     // Slow blocks can be offloaded to the background if using worker threads.
-    let slow_example = StatusBlock::new()
+    let slow_example = StatusBlock::default()
         .name("slow_example")
         .command(|| slow_example())
         .poll_interval(Duration::from_secs(3))
@@ -57,7 +57,7 @@ fn blocks() -> Vec<StatusBlock>
         .update_in_background(true); // try setting this to false
 
     // Finally, an example using a closure:
-    let closure_example = StatusBlock::new()
+    let closure_example = StatusBlock::default()
         .name("closure_example")
         .command(|| {
             let output = "hello from a closure";

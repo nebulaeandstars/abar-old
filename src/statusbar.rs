@@ -49,58 +49,6 @@ pub struct StatusBar
 
 impl StatusBar
 {
-    /// Returns a new StatusBar with default values.
-    pub fn new() -> Self
-    {
-        StatusBar {
-            blocks:             Vec::new(),
-            refresh_rate:       Duration::from_secs(1),
-            delimiter:          String::new(),
-            left_buffer:        String::new(),
-            right_buffer:       String::new(),
-            hide_empty_modules: false,
-            jobs_channel:       spmc::channel(),
-            results_channel:    mpsc::channel(),
-            threads:            Vec::new(),
-        }
-    }
-
-    pub fn blocks(mut self, blocks: Vec<StatusBlock>) -> Self
-    {
-        self.blocks = blocks;
-        self
-    }
-
-    pub fn refresh_rate(mut self, refresh_rate: Duration) -> Self
-    {
-        self.refresh_rate = refresh_rate;
-        self
-    }
-
-    pub fn delimiter(mut self, delimiter: &str) -> Self
-    {
-        self.delimiter = delimiter.to_string();
-        self
-    }
-
-    pub fn left_buffer(mut self, left_buffer: &str) -> Self
-    {
-        self.left_buffer = left_buffer.to_string();
-        self
-    }
-
-    pub fn right_buffer(mut self, right_buffer: &str) -> Self
-    {
-        self.right_buffer = right_buffer.to_string();
-        self
-    }
-
-    pub fn hide_empty_modules(mut self, hide_empty_modules: bool) -> Self
-    {
-        self.hide_empty_modules = hide_empty_modules;
-        self
-    }
-
     /// Puts the current thread to sleep for an amount of time defined by the
     /// StatusBar's refresh_rate.
     pub fn sleep(&self) { thread::sleep(self.refresh_rate) }
@@ -168,7 +116,47 @@ impl StatusBar
             false => String::new(),
         }
     }
+
+
+    // ------ builder methods ------ //
+
+    pub fn blocks(mut self, blocks: Vec<StatusBlock>) -> Self
+    {
+        self.blocks = blocks;
+        self
+    }
+
+    pub fn refresh_rate(mut self, refresh_rate: Duration) -> Self
+    {
+        self.refresh_rate = refresh_rate;
+        self
+    }
+
+    pub fn delimiter(mut self, delimiter: &str) -> Self
+    {
+        self.delimiter = delimiter.to_string();
+        self
+    }
+
+    pub fn left_buffer(mut self, left_buffer: &str) -> Self
+    {
+        self.left_buffer = left_buffer.to_string();
+        self
+    }
+
+    pub fn right_buffer(mut self, right_buffer: &str) -> Self
+    {
+        self.right_buffer = right_buffer.to_string();
+        self
+    }
+
+    pub fn hide_empty_modules(mut self, hide_empty_modules: bool) -> Self
+    {
+        self.hide_empty_modules = hide_empty_modules;
+        self
+    }
 }
+
 
 impl fmt::Display for StatusBar
 {
@@ -192,5 +180,18 @@ impl fmt::Display for StatusBar
 
 impl Default for StatusBar
 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self
+    {
+        StatusBar {
+            blocks:             Vec::new(),
+            refresh_rate:       Duration::from_secs(1),
+            delimiter:          String::new(),
+            left_buffer:        String::new(),
+            right_buffer:       String::new(),
+            hide_empty_modules: false,
+            jobs_channel:       spmc::channel(),
+            results_channel:    mpsc::channel(),
+            threads:            Vec::new(),
+        }
+    }
 }
