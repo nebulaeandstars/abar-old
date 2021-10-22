@@ -167,10 +167,10 @@ impl fmt::Display for StatusBar
         for (i, block) in self.blocks.iter().enumerate() {
             if !self.hide_empty_modules || !block.is_empty() {
                 out.push_str(&format!(
-                    "{}{}",
-                    self.get_delimiter_at_index(i),
-                    block,
-                ));
+                        "{}{}",
+                        self.get_delimiter_at_index(i),
+                        block,
+                        ));
             }
         }
 
